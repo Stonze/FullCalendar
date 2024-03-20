@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee https://java.sun.com/xml/ns/javaee/web-app_3_1.xsd">
+
+	<!-- The definition of the Root Spring Container shared by all Servlets and Filters -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/spring/root-context.xml</param-value>
+	</context-param>
+	
+	<!-- Creates the Spring Container shared by all Servlets and Filters -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<!-- Processes application requests -->
+	<servlet>
+		<servlet-name>appServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring/appServlet/servlet-context.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+		<!-- 
+			web.xml의 설정은 WAS(Tomcat) 자체 설정일 뿐입니다!
+			multipart-config: 메모리 사이즈, 업로드 파일 저장 위치, 최대 크기 설정
+			- location : 저장할 디렉토리(필수)
+			- max-file-size : 업로드 파일 최대 크기(기본값 : -1L, 제한이 없다.)
+			- max-request-size : 한번 요청 시 업로드 파일 최대 크키
+			- file-size-threshold : 설정 크기가 넘는 경우 임시 디렉트뢰에 저장(기본값 0, 설정하지 않은 한 무조건 저장)
+			
+			web.xml에서 설정하지 않을때는  @MultipartConfig 어노테이션으로도 설정이 가능하다.
+			- 요청을 받는 컨트롤러에 설정이 가능하다. (메소드 라인이 아니라 컨트롤러인 클래스 라인에 설정)
+			@MultipartConfig(
+				location : "D:/upload",
+				maxFileSize : "246785264",
+				maxRequestSize : "478957274",
+				fileSizeThreshold : "154987471"
+			)
+			
+			임시파일이 저장되는 경로는 다음과 같다.
+			- C:/Users/pc22/Appdata/Local/Temp
+		 -->
+<!-- 		 <multipart-confnig>
+		 	업로드 되는 파일을 저장할 공간
+		 	<location>C:\\upload</location>
+		 	업로드 파일의 최대 크기
+		 	<max-file-size>246785264</max-file-size>
+		 	한번에 올릴 수 있는 최대 크기
+		 	<max-request-size>478957274</max-request-size>
+		 	메모리 저장 크기
+		 	<file-size-threshold>154987471</file-size-threshold>
+		 </multipart-confnig> -->
+	</servlet>
+		
+	<servlet-mapping>
+		<servlet-name>appServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	
+	<!-- 한글 처리를 위한 UTF 필터 등록 -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<!-- 
+		MultipartFilter 적용 : 파일 업로드를 위한 필터 적용
+		- MultipartFilter의 역할은 들어온 요청이 multipart/form-data유형의 요청인지를 확인하여
+		  multipart 형태의 요청이면 MultipartResolver를 통해 multipart 요청을 확인합니다.
+		   그리고 해당 요청이 적절한 요청이면 MultipartHttpServletRequest로 랩핑합니다.
+		- MultipartFilter의 기본 빈 이름은 'filterMultipartResolver'이다.
+	 -->
+	<filter>
+		<filter-name>multipartFilter</filter-name>
+		<filter-class>org.springframework.web.multipart.support.MultipartFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>multipartFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+</web-app>
